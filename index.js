@@ -38,6 +38,28 @@ app.get("/faq", (req, res) => {
   ]);
 });
 
+app.get("/content", (req, res) => {
+  res.status(200).json({
+    data: [
+      {
+        question: "What is this platform?",
+        answer: "This is for all the people who want to learn Express.js.",
+        readTime: "20 min",
+      },
+      {
+        question: "Is this platform free?",
+        answer: "Yes, it is completely free to use.",
+        readTime: "20 min",
+      },
+      {
+        question: "Can I contribute?",
+        answer:
+          "Yes! You can contribute by submitting tutorials and code examples.",
+        readTime: "20 min",
+      },
+    ],
+  });
+});
 app.get("/question", (req, res) => {
   res.status(200).json({
     data: [
@@ -57,9 +79,6 @@ app.get("/question", (req, res) => {
     ],
   });
 });
-
-
-
 
 app.listen(4000, () => {
   console.log("Server is running on http://localhost:4000");
