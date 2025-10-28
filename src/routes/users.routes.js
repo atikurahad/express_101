@@ -7,7 +7,7 @@ router.get("/login", (req, res) => {
   //     message: " Login ",
   //   });
 
-  res.cookie("name", "BBbbbbbbbbbbbbbb"); // name এর পরে স্পেসও ফেলে দাও
+  res.cookie("name", "BBbbbbbbbbbbbbbb"); 
   res.status(200).json({ message: "Login successful, cookie set!" });
 });
 router.get("/register", (req, res) => {

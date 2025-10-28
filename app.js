@@ -1,26 +1,24 @@
 const express = require("express");
 const path = require("path");
-
+const morgan = require("morgan");
 const app = express();
 
 const userRouter = require("./src/routes/users.routes");
+const activityLogger = require("./src/middlewares/logger");
+
+//morgan
+app.use(morgan("combined"));
 
 // API routes
 app.use("/api/user", userRouter);
 
-// query params
-// app.get("/", (req, res) => {
-//   const { name, id } = req.query;
-//   res.send(`<h1> req id is :${id} name is ${name} </h1>`);
-// });
+app.use(activityLogger);
 
-// route params
-
-// app.get("/reqId/:id/age/:age", (req, res) => {
-//   const { id, age } = req.params;
-
-//   res.send(`<h1> req id is :${id} age is ${age} </h1>`);
-// });
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "Custom Middleware",
+  });
+});
 
 //header params
 app.get("/reqId/:id/age/:age", (req, res) => {
