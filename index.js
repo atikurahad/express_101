@@ -1,20 +1,22 @@
-// const app = require("./app");
-
 const express = require("express");
 const cors = require("cors");
-const app = express();
+require("dotenv").config();
 
-//middlewares
+const app = express();
+const PORT = 4000;
+
+// Middlewares
 app.use(express.json());
 app.use(cors());
 
-
-
-//connecting to the database
+// MongoDB
 const { MongoClient, ServerApiVersion } = require("mongodb");
+const uri = process.env.URI;
 
-const uri =
-  "mongodb+srv://adifanan79:adifanan79@practiceshop.5j9ijl6.mongodb.net/?retryWrites=true&w=majority";
+if (!uri) {
+  console.error("URI not found in .env file!");
+  process.exit(1);
+}
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -22,38 +24,56 @@ const client = new MongoClient(uri, {
     strict: true,
     deprecationErrors: true,
   },
-  tls: true,
-  tlsAllowInvalidCertificates: true,
 });
 
 async function run() {
   try {
+    // Connect to MongoDB
     await client.connect();
+    console.log("MongoDB Connected Successfully! ☁️ 🪐");
 
-    //create db and collections
     const db = client.db("practiceShopDB");
     const usersCollection = db.collection("users");
 
-    // insert a test user
+    // Route: Add user
     app.post("/add-user", async (req, res) => {
-      const newUser = req.body;
-      const result = await usersCollection.insertOne(newUser);
-      res.send(result);
-      // usersCollection.insertOne()
+      try {
+        const newUser = req.body;
+        const result = await usersCollection.insertOne(newUser);
+        res.status(201).json({
+          message: "User added successfully",
+          insertedId: result.insertedId,
+        });
+      } catch (error) {
+        console.error("Error adding user:", error);
+        res
+          .status(500)
+          .json({ message: "Error adding user", error: error.message });
+      }
     });
 
+    // Ping test
     await client.db("admin").command({ ping: 1 });
+    console.log(
+      "Pinged your deployment. You successfully connected to MongoDB!"
+    );
 
-    console.log("MongoDB Connected Successfully!☁️ 🪐");
+    // Start server only after DB connection
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
   } catch (err) {
-    console.log("Mongo DB ERROR:", err);
+    console.error("MongoDB Connection Failed:", err);
+    process.exit(1);
   }
 }
 
-run();
+// Run the app
+run().catch(console.dir);
 
-const PORT = 4000;
-
-app.listen(PORT, () => {
-  console.log("Server is running on http://localhost:4000");
+// Optional: Graceful shutdown
+process.on("SIGINT", async () => {
+  await client.close();
+  console.log("MongoDB connection closed.");
+  process.exit(0);
 });
