@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 // MongoDB
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = process.env.URI;
 
 if (!uri) {
@@ -51,6 +51,55 @@ async function run() {
           .json({ message: "Error adding user", error: error.message });
       }
     });
+
+    // route  find all users
+    app.get("/users", async (req, res) => {
+      try {
+        const users = await usersCollection.find().toArray();
+        console.log(users);
+
+        res.status(200).json({
+          message: "Users retrieved successfully",
+          data: users,
+        });
+      } catch (error) {
+        res
+          .status(400)
+          .json({ message: "Error retrieving users", error: error.message });
+      }
+    });
+
+    //get single user
+    app.get("/user/:id", async (req, res) => {
+      try {
+        const { id } = req.params;
+
+        const user = await usersCollection.findOne({ _id: new ObjectId(id) });
+        res.status(200).json({
+          message: "User retrieved successfully",
+          data: user,
+        });
+      } catch (error) {
+        res
+          .status(400)
+          .json({ message: "Error retrieving users", error: error.message });
+      }
+    });
+
+    // delete user
+   app.delete("/user/:id", async (req, res) => {
+     const { id } = req.params;
+
+     if (!ObjectId.isValid(id))
+       return res.status(400).json({ message: "Invalid ID" });
+
+     const result = await usersCollection.deleteOne({ _id: new ObjectId(id) });
+
+     if (result.deletedCount === 0)
+       return res.status(404).json({ message: "User not found" });
+
+     res.json({ message: "User deleted successfully" });
+   });
 
     // Ping test
     await client.db("admin").command({ ping: 1 });
