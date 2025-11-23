@@ -92,7 +92,7 @@ async function run() {
       const email = req.params.email;
 
       try {
-        const user = await usersCollection.findOne({ email });
+        const user = await usersCollection.findOne({ email },{name:0});
 
         if (!user) {
           return res.status(403).json({
@@ -111,6 +111,33 @@ async function run() {
         });
       }
     });
+
+
+
+    app.patch(('/update-user/:id'), async(req,res)=>{
+
+      const {id} = req.params;
+      const userdata = req.body;
+
+      try {
+        const filter = {_id : new ObjectId(id)}
+        const updateInfo = {
+          $set:{
+            name:userdata.name,
+            age:userdata.age,
+            email:userdata.email,
+          }
+        }
+
+      } catch (error) {
+        res.status(500).json({
+          message: "Server error",
+          error: error.message,
+        });
+      }
+
+    })
+
 
 
     // delete user
